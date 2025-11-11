@@ -1,0 +1,18 @@
+# Core dependencies for tennis analyzer
+
+# Computer vision and object detection
+ultralytics==8.0.196
+opencv-python==4.8.1.78
+torch==2.0.1
+torchvision==0.15.2
+
+# Data processing
+pandas==2.0.3
+numpy==1.24.3
+
+# Testing
+pytest==7.4.0
+pytest-cov==4.1.0
+
+# Utilities
+tqdm==4.66.1
