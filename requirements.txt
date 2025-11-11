@@ -1,22 +1,15 @@
-# Core dependencies for Tennis Analysis System
+# Tennis Analyzer Dependencies
 
-# Deep Learning
+# Deep Learning & Computer Vision
+ultralytics==8.0.196
 torch==2.0.1
 torchvision==0.15.2
 
-# Computer Vision
+# Video Processing
 opencv-python==4.8.1.78
 
-# Object Detection
-ultralytics==8.0.0
-
-# Numerical Computing
-numpy<2
-pandas==2.0.3
+# Data Processing
+numpy==1.24.3
 
 # Testing
 pytest==7.4.0
-pytest-cov==4.1.0
-
-# Utilities
-tqdm==4.66.1

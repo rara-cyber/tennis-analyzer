@@ -1,19 +1,19 @@
-"""Utility modules for tennis analyzer."""
+"""Utility functions for tennis analysis."""
 
-from .video_utils import (
-    read_video,
-    save_video,
-    load_cache,
-    save_cache,
-    cache_exists,
-    display_progress
+from .bbox_utils import (
+    get_center_of_bbox,
+    get_foot_position,
+    get_bbox_width,
+    get_bbox_height,
+    measure_distance,
+    measure_xy_distance
 )
 
 __all__ = [
-    'read_video',
-    'save_video',
-    'load_cache',
-    'save_cache',
-    'cache_exists',
-    'display_progress'
+    'get_center_of_bbox',
+    'get_foot_position',
+    'get_bbox_width',
+    'get_bbox_height',
+    'measure_distance',
+    'measure_xy_distance'
 ]

@@ -1,1 +1,1 @@
-"""Test modules for tennis analyzer."""
+"""Unit tests for tennis analyzer."""

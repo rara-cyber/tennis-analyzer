@@ -1,44 +1,31 @@
-"""Video utilities for reading, writing, and caching video data."""
+"""Video processing and caching utilities."""
 
 import cv2
 import pickle
 import os
 import sys
 import time
-from typing import List, Dict, Tuple, Any
 import numpy as np
+from typing import List, Dict, Any, Tuple
 
 
 def read_video(video_path: str) -> Tuple[List[np.ndarray], Dict[str, Any]]:
     """
-    Read video frames and metadata.
+    Read video file and extract frames.
 
     Args:
-        video_path: Path to input video file
+        video_path: Path to video file
 
     Returns:
-        Tuple of (frames list, metadata dict)
-        metadata contains: fps, width, height, total_frames
+        Tuple of (frames, metadata) where:
+        - frames: List of video frames as numpy arrays
+        - metadata: Dictionary with video properties (fps, width, height, frame_count)
     """
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
-        raise ValueError(f"Could not open video file: {video_path}")
+        raise ValueError(f"Error opening video file: {video_path}")
 
-    # Get video metadata
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-    metadata = {
-        'fps': fps,
-        'width': width,
-        'height': height,
-        'total_frames': total_frames
-    }
-
-    # Read all frames
     frames = []
     while True:
         ret, frame = cap.read()
@@ -46,30 +33,28 @@ def read_video(video_path: str) -> Tuple[List[np.ndarray], Dict[str, Any]]:
             break
         frames.append(frame)
 
+    metadata = {
+        'fps': int(cap.get(cv2.CAP_PROP_FPS)),
+        'width': int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        'height': int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        'frame_count': len(frames)
+    }
+
     cap.release()
-
-    print(f"✓ Read {len(frames)} frames from {video_path}")
-    print(f"  Resolution: {width}x{height}, FPS: {fps}")
-
     return frames, metadata
 
 
 def save_video(frames: List[np.ndarray], output_path: str, fps: int = 24) -> None:
     """
-    Save frames to video file.
+    Save frames as video file.
 
     Args:
         frames: List of video frames
-        output_path: Path to output video file
-        fps: Frames per second
+        output_path: Path to save video
+        fps: Frames per second (default: 24)
     """
     if not frames:
         raise ValueError("No frames to save")
-
-    # Create output directory if it doesn't exist
-    output_dir = os.path.dirname(output_path)
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
 
     # Get frame dimensions
     height, width = frames[0].shape[:2]
@@ -83,8 +68,40 @@ def save_video(frames: List[np.ndarray], output_path: str, fps: int = 24) -> Non
         out.write(frame)
 
     out.release()
+    print(f"✓ Video saved to {output_path}")
 
-    print(f"✓ Saved {len(frames)} frames to {output_path}")
+
+def save_cache(data: Any, cache_path: str) -> None:
+    """
+    Save data to cache file using pickle.
+
+    Args:
+        data: Data to cache
+        cache_path: Path to save cache file
+    """
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+
+    with open(cache_path, 'wb') as f:
+        pickle.dump(data, f)
+
+    print(f"✓ Cache saved to {cache_path}")
+
+
+def load_cache(cache_path: str) -> Any:
+    """
+    Load data from cache file.
+
+    Args:
+        cache_path: Path to cache file
+
+    Returns:
+        Cached data
+    """
+    with open(cache_path, 'rb') as f:
+        data = pickle.load(f)
+
+    return data
 
 
 def cache_exists(cache_path: str) -> bool:
@@ -100,64 +117,31 @@ def cache_exists(cache_path: str) -> bool:
     return os.path.exists(cache_path)
 
 
-def load_cache(cache_path: str) -> Any:
-    """
-    Load cached data from pickle file.
-
-    Args:
-        cache_path: Path to cache file
-
-    Returns:
-        Cached data
-    """
-    with open(cache_path, 'rb') as f:
-        data = pickle.load(f)
-
-    return data
-
-
-def save_cache(data: Any, cache_path: str) -> None:
-    """
-    Save data to cache file.
-
-    Args:
-        data: Data to cache
-        cache_path: Path to cache file
-    """
-    # Create directory if it doesn't exist
-    cache_dir = os.path.dirname(cache_path)
-    if cache_dir and not os.path.exists(cache_dir):
-        os.makedirs(cache_dir)
-
-    with open(cache_path, 'wb') as f:
-        pickle.dump(data, f)
-
-    print(f"✓ Cached data saved to {cache_path}")
-
-
-def display_progress(current: int, total: int, prefix: str = "Progress", start_time: float = None) -> None:
+def display_progress(current: int, total: int, task_name: str = "Progress", start_time: float = None) -> None:
     """
     Display progress bar in console.
 
     Args:
         current: Current iteration
         total: Total iterations
-        prefix: Prefix string
-        start_time: Start time for ETA calculation
+        task_name: Name of task being tracked
+        start_time: Start time (from time.time())
     """
+    progress = current / total
     bar_length = 50
-    filled_length = int(bar_length * current // total)
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
-    percent = 100 * (current / float(total))
+    filled_length = int(bar_length * progress)
+    bar = '=' * filled_length + '-' * (bar_length - filled_length)
 
-    # Calculate ETA
-    eta_str = ""
-    if start_time and current > 0:
+    # Calculate time remaining
+    time_str = ""
+    if start_time:
         elapsed = time.time() - start_time
-        eta = elapsed * (total - current) / current
-        eta_str = f" ETA: {eta:.1f}s"
+        if current > 0:
+            eta = (elapsed / current) * (total - current)
+            time_str = f" ETA: {eta:.1f}s"
 
-    sys.stdout.write(f'\r{prefix}: |{bar}| {percent:.1f}% ({current}/{total}){eta_str}')
+    # Print progress bar
+    sys.stdout.write(f'\r{task_name}: [{bar}] {current}/{total} ({progress*100:.1f}%){time_str}')
     sys.stdout.flush()
 
     if current == total:

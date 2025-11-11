@@ -1,5 +1,3 @@
-"""Tracker modules for tennis video analysis."""
+from .player_tracker import PlayerTracker
 
-from .ball_tracker import BallTracker
-
-__all__ = ['BallTracker']
+__all__ = ['PlayerTracker']
