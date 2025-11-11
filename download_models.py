@@ -44,36 +44,57 @@ def download_court_model():
 
 
 def download_ball_model():
-    """Download ball detection model."""
+    """Download fine-tuned tennis ball detection model."""
 
+    # Create models directory
     os.makedirs('models', exist_ok=True)
 
-    # Ball tracking model URL (placeholder)
-    model_url = "https://example.com/models/ball_tracking_model.pth"
-    model_path = "models/ball_tracking_model.pth"
+    # Model configuration
+    # NOTE: Replace with actual model URL when available
+    model_url = "https://github.com/your-repo/releases/download/v1.0/yolov5_tennis_ball.pt"
+    model_path = "models/yolov5_tennis_ball.pt"
 
+    # Check if model already exists
     if os.path.exists(model_path):
-        print(f"✓ Ball model already exists: {model_path}")
-        return
+        print(f"✓ Model already exists: {model_path}")
+        response = input("Do you want to re-download? (y/n): ")
+        if response.lower() != 'y':
+            return
 
-    print(f"Downloading ball tracking model from {model_url}...")
-    print("Note: Please replace the model_url with the actual URL when available.")
+    print("="*60)
+    print("Downloading tennis ball detection model...")
+    print("="*60)
+    print(f"URL: {model_url}")
+    print(f"Destination: {model_path}")
+    print()
 
     try:
         # Download with progress
         def report_progress(block_num, block_size, total_size):
             downloaded = block_num * block_size
-            percent = min(100, downloaded * 100 / total_size)
-            print(f"\rProgress: {percent:.1f}%", end='', flush=True)
+            percent = min(downloaded * 100.0 / total_size, 100.0)
+            bar_length = 50
+            filled = int(bar_length * percent / 100)
+            bar = '█' * filled + '-' * (bar_length - filled)
+            sys.stdout.write(f'\rProgress: |{bar}| {percent:.1f}%')
+            sys.stdout.flush()
 
         urllib.request.urlretrieve(model_url, model_path, reporthook=report_progress)
-        print(f"\n✓ Ball model downloaded: {model_path}")
+        print("\n")
+        print(f"✓ Model downloaded successfully: {model_path}")
+
+    except urllib.error.URLError as e:
+        print(f"\n✗ Download failed: {e}")
+        print("\nThe model URL may not be available yet.")
+        print("You can:")
+        print("  1. Use the generic YOLOv8n model (automatic fallback)")
+        print("  2. Train your own model (see training/README.md)")
+        print("  3. Update the model_url in this script with the correct URL")
+        sys.exit(1)
 
     except Exception as e:
-        print(f"\n✗ Failed to download ball model: {e}")
-        print("\nManual download instructions:")
-        print("1. Download the model from the project releases")
-        print(f"2. Place it in: {model_path}")
+        print(f"\n✗ Unexpected error: {e}")
+        sys.exit(1)
 
 
 def download_player_detector_model():
@@ -107,6 +128,25 @@ def download_player_detector_model():
         print("\nManual download instructions:")
         print("1. Download YOLOv8 model from Ultralytics")
         print(f"2. Place it in: {model_path}")
+
+
+def download_yolov8_fallback():
+    """Download generic YOLOv8n model as fallback."""
+    print("\n" + "="*60)
+    print("Downloading generic YOLOv8n model (fallback)...")
+    print("="*60)
+
+    try:
+        from ultralytics import YOLO
+
+        # This will auto-download YOLOv8n if not present
+        model = YOLO('yolov8n.pt')
+        print("✓ Generic YOLOv8n model ready")
+        print("  Note: Detection accuracy may be lower than fine-tuned model")
+
+    except Exception as e:
+        print(f"✗ Failed to download YOLOv8n: {e}")
+        sys.exit(1)
 
 
 def create_placeholder_models():

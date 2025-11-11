@@ -1,3 +1,1 @@
-"""
-Test Suite for Tennis Analysis System
-"""
+"""Test modules for tennis analyzer."""
