@@ -1,15 +1,7 @@
-# Tennis Analyzer Dependencies
-
-# Deep Learning & Computer Vision
-ultralytics==8.0.196
-torch==2.0.1
-torchvision==0.15.2
-
-# Video Processing
+# Video Processing Dependencies
 opencv-python==4.8.1.78
-
-# Data Processing
 numpy==1.24.3
 
-# Testing
-pytest==7.4.0
+# Testing Dependencies
+pytest==7.4.3
+pytest-cov==4.1.0

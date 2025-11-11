@@ -1,1 +1,3 @@
-"""Unit tests for tennis analyzer."""
+"""
+Test suite for tennis analysis system.
+"""
