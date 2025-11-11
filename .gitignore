@@ -1,0 +1,45 @@
+# Environment variables
+.env
+.env.local
+*.key
+*.pem
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+.Python
+env/
+build/
+dist/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Data and uploads
+/data
+/uploads
+/backups
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build outputs
+dist/
+build/
